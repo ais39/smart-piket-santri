@@ -107,7 +107,23 @@
                     <div id="mobileDayPills" class="flex md:hidden gap-2 overflow-x-auto pb-2 pt-1"></div>
                 </div>
 
-                <!-- Grid Kartu Atas: Info Kelompok & Statistik Gelap (Terinspirasi dari referensi UI) -->
+                <!-- FITUR BARU 1: Banner Apresiasi (Muncul otomatis saat 100% tugas selesai) -->
+                <div id="completionBanner" class="hidden bg-emerald-600 text-white rounded-2xl p-4 sm:px-6 flex items-center justify-between gap-4 shadow-md transition-all">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                            <i data-lucide="party-popper" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-base sm:text-lg tracking-tight">MasyaAllah! Semua tugas selesai</h3>
+                            <p class="text-xs sm:text-sm text-emerald-100">Jazakumullahu khairan kepada regu piket yang telah menjaga kebersihan hari ini.</p>
+                        </div>
+                    </div>
+                    <span class="hidden sm:inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-xs font-semibold">
+                        100% Tuntas
+                    </span>
+                </div>
+
+                <!-- Grid Kartu Atas: Info Kelompok & Statistik Gelap -->
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     
                     <!-- KARTU KIRI: Info Kelompok & Lokasi Piket (7 Kolom) -->
@@ -194,12 +210,42 @@
                     <div class="p-6 border-b border-borderGray flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div>
                             <h3 class="text-lg font-bold text-slate-900">Daftar Checklist Tugas</h3>
-                            <p class="text-xs text-slate-500">Klik pada tugas untuk menandai sudah dikerjakan atau belum.</p>
+                            <p class="text-xs text-slate-500">Klik pada tugas untuk menandai sudah dikerjakan atau tambahkan tugas mandiri di bawah.</p>
                         </div>
                         <span id="statusBadge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 w-fit">
                             Dalam Pengerjaan
                         </span>
                     </div>
+
+                    <!-- FITUR BARU 2: Form Input Checklist Tambahan Mandiri -->
+                    <form id="addTaskForm" class="p-4 sm:px-6 bg-softGray border-b border-borderGray flex flex-col sm:flex-row gap-3">
+                        <div class="flex-1">
+                            <label for="newTaskInput" class="sr-only">Nama Tugas Tambahan</label>
+                            <input 
+                                type="text" 
+                                id="newTaskInput" 
+                                placeholder="Tambah tugas piket mandiri (contoh: Mengelap kaca jendela)..." 
+                                required
+                                class="w-full px-4 py-2.5 rounded-xl bg-white border border-borderGray text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-darkCard/20 focus:border-darkCard transition-all"
+                            >
+                        </div>
+                        <div class="sm:w-52">
+                            <label for="newTaskPicSelect" class="sr-only">Pilih Penanggung Jawab</label>
+                            <select 
+                                id="newTaskPicSelect" 
+                                class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-borderGray text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-darkCard/20 focus:border-darkCard transition-all"
+                            >
+                                <!-- Opsi anggota diisi otomatis sesuai hari aktif -->
+                            </select>
+                        </div>
+                        <button 
+                            type="submit" 
+                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-darkCard text-white text-sm font-medium hover:bg-slate-800 active:scale-95 transition-all shrink-0 shadow-sm"
+                        >
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span>Tambah</span>
+                        </button>
+                    </form>
 
                     <!-- Tabel / List Checklist -->
                     <div id="checklistContainer" class="divide-y divide-borderGray">
@@ -211,7 +257,7 @@
                 <div class="bg-white rounded-2xl border border-borderGray p-5 flex items-start gap-3">
                     <i data-lucide="info" class="w-5 h-5 text-slate-500 shrink-0 mt-0.5"></i>
                     <div class="text-xs text-slate-600 leading-relaxed">
-                        <strong class="text-slate-900">Catatan Penting:</strong> Seluruh data perubahan checklist tersimpan otomatis di browser perangkat ini. Gunakan tombol <strong>Reset Checklist</strong> di pojok kanan atas jika ingin mengulang tugas hari ini dari awal.
+                        <strong class="text-slate-900">Catatan Penting:</strong> Seluruh data perubahan checklist maupun tugas tambahan tersimpan otomatis di browser perangkat ini. Gunakan tombol <strong>Reset Checklist</strong> di pojok kanan atas untuk mengosongkan kembali status centang hari ini.
                     </div>
                 </div>
 
@@ -232,7 +278,7 @@
     <!-- Notifikasi Toast (Pengganti alert() agar tampilan modern) -->
     <div id="toastNotification" class="fixed bottom-5 right-5 bg-darkCard text-white px-4 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-2.5 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
         <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
-        <span id="toastMessage">Checklist berhasil direset!</span>
+        <span id="toastMessage">Checklist berhasil diperbarui!</span>
     </div>
 
     <!-- KODE JAVASCRIPT -->
@@ -322,7 +368,7 @@
          */
         function muatData() {
             try {
-                const tersimpan = localStorage.getItem("smartPiketSantri_v1");
+                const tersimpan = localStorage.getItem("smartPiketSantri_v2");
                 if (tersimpan) {
                     dataPiket = JSON.parse(tersimpan);
                 } else {
@@ -337,7 +383,7 @@
 
         function simpanData() {
             try {
-                localStorage.setItem("smartPiketSantri_v1", JSON.stringify(dataPiket));
+                localStorage.setItem("smartPiketSantri_v2", JSON.stringify(dataPiket));
             } catch (error) {
                 console.error("Gagal menyimpan data:", error);
             }
@@ -409,6 +455,13 @@
                 </span>
             `).join("");
 
+            // Update Dropdown Pilihan Anggota di Form Tugas Tambahan
+            const picSelect = document.getElementById("newTaskPicSelect");
+            picSelect.innerHTML = `
+                <option value="Seluruh Regu">PIC: Seluruh Regu</option>
+                ${infoHari.anggota.map(nama => `<option value="${nama}">PIC: ${nama}</option>`).join("")}
+            `;
+
             // Hitung Statistik Tugas Selesai & Belum Selesai
             const totalTugas = infoHari.tugas.length;
             const jumlahSelesai = infoHari.tugas.filter(t => t.selesai).length;
@@ -421,12 +474,16 @@
             document.getElementById("progressPercent").textContent = `${persentase}%`;
             document.getElementById("progressBar").style.width = `${persentase}%`;
 
-            // Update Badge Status Keseluruhan
+            // FITUR BARU 1: Tampilkan pesan 'MasyaAllah! Semua tugas selesai' jika 100% tercentang
+            const completionBanner = document.getElementById("completionBanner");
             const statusBadge = document.getElementById("statusBadge");
+            
             if (jumlahSelesai === totalTugas && totalTugas > 0) {
+                completionBanner.classList.remove("hidden");
                 statusBadge.className = "inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 w-fit";
-                statusBadge.textContent = "Semua Tugas Selesai";
+                statusBadge.textContent = "MasyaAllah! Semua tugas selesai";
             } else {
+                completionBanner.classList.add("hidden");
                 statusBadge.className = "inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 w-fit";
                 statusBadge.textContent = `${jumlahBelum} Tugas Belum Selesai`;
             }
@@ -444,6 +501,18 @@
                 // Klik baris untuk toggle checklist
                 row.onclick = () => toggleTugas(index);
 
+                // Label tambahan jika tugas dibuat secara mandiri
+                const badgeMandiri = item.tambahan 
+                    ? `<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-semibold bg-sky-50 text-sky-700 border border-sky-200">Mandiri</span>` 
+                    : "";
+
+                // Tombol hapus khusus untuk tugas tambahan mandiri
+                const tombolHapus = item.tambahan
+                    ? `<button type="button" onclick="hapusTugasTambahan(event, ${index})" title="Hapus tugas tambahan" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                       </button>`
+                    : "";
+
                 row.innerHTML = `
                     <div class="flex items-start sm:items-center gap-4">
                         <!-- Custom Checkbox -->
@@ -459,7 +528,7 @@
                             <p class="text-sm font-medium transition-all ${
                                 item.selesai ? "line-through text-slate-400" : "text-slate-900"
                             }">
-                                ${item.nama}
+                                ${item.nama}${badgeMandiri}
                             </p>
                             <p class="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
                                 <span>Penanggung jawab:</span>
@@ -468,7 +537,7 @@
                         </div>
                     </div>
 
-                    <div class="shrink-0">
+                    <div class="flex items-center gap-2 shrink-0">
                         <span class="px-2.5 py-1 rounded-lg text-xs font-medium border ${
                             item.selesai 
                             ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
@@ -476,6 +545,7 @@
                         }">
                             ${item.selesai ? "Selesai" : "Belum"}
                         </span>
+                        ${tombolHapus}
                     </div>
                 `;
                 checklistContainer.appendChild(row);
@@ -486,7 +556,7 @@
         }
 
         /**
-         * 5. FUNGSI INTERAKSI (GANTI HARI, TOGGLE CHECKLIST, RESET)
+         * 5. FUNGSI INTERAKSI (GANTI HARI, TAMBAH TUGAS, TOGGLE CHECKLIST, RESET)
          */
         function gantiHari(hariBaru) {
             hariAktif = hariBaru;
@@ -500,11 +570,53 @@
             }
         }
 
+        // FITUR BARU 2: Menambahkan checklist tambahan mandiri
+        function tambahTugasMandiri(event) {
+            event.preventDefault();
+            const inputEl = document.getElementById("newTaskInput");
+            const selectEl = document.getElementById("newTaskPicSelect");
+            
+            const namaTugas = inputEl.value.trim();
+            if (!namaTugas) return;
+
+            const tugasBaru = {
+                id: `custom-${Date.now()}`,
+                nama: namaTugas,
+                pic: selectEl.value,
+                selesai: false,
+                tambahan: true // Penanda bahwa ini tugas tambahan mandiri
+            };
+
+            dataPiket[hariAktif].tugas.push(tugasBaru);
+            simpanData();
+            renderKontenHari();
+
+            // Kosongkan input setelah ditambahkan
+            inputEl.value = "";
+            tampilkanNotifikasi(`Tugas tambahan berhasil ditambahkan ke hari ${hariAktif}!`);
+        }
+
+        // Fungsi menghapus tugas tambahan mandiri
+        function hapusTugasTambahan(event, indexTugas) {
+            event.stopPropagation(); // Mencegah baris ikut ter-toggle saat tombol hapus diklik
+            dataPiket[hariAktif].tugas.splice(indexTugas, 1);
+            simpanData();
+            renderKontenHari();
+            tampilkanNotifikasi("Tugas tambahan telah dihapus.");
+        }
+
         function toggleTugas(indexTugas) {
             const tugas = dataPiket[hariAktif].tugas[indexTugas];
             tugas.selesai = !tugas.selesai;
             simpanData();
             renderKontenHari();
+
+            // Cek apakah setelah dicentang semua tugas menjadi selesai
+            const daftarTugas = dataPiket[hariAktif].tugas;
+            const semuaSelesai = daftarTugas.length > 0 && daftarTugas.every(t => t.selesai);
+            if (semuaSelesai && tugas.selesai) {
+                tampilkanNotifikasi("MasyaAllah! Semua tugas selesai");
+            }
         }
 
         function resetChecklistHariIni() {
@@ -539,6 +651,9 @@
             muatData();
             renderNavigasiHari();
             renderKontenHari();
+
+            // Event form tambah checklist mandiri
+            document.getElementById("addTaskForm").addEventListener("submit", tambahTugasMandiri);
 
             // Event tombol reset
             document.getElementById("resetBtn").addEventListener("click", resetChecklistHariIni);
